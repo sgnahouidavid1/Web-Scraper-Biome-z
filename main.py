@@ -2,11 +2,11 @@ import requests  # pip install requests in terminal
 from bs4 import BeautifulSoup  # pip install BeautifulSoup in terminal
 import tkinter as WebScraper_articles # adding the tkinter libary
 import random # use to generate random numbers random.randint() 
-import webbrowser
+import webbrowser # allow to open a website
 from tkinter import *
 from PIL import Image, ImageTk # allow the import of images in to the Gui progarm
 import pandas as pd  # pip install pandas in terminal
-bg_color = "#3A9AF9"
+bg_color = "#3A9AF9" # background color 
 def clear_data (frame):
     for widght in frame.winfo_children():
         widght.destroy()
@@ -78,7 +78,7 @@ load_frame1()
 
 
 
-# link_button.grid( column = 0, row =2) # positioning 
+
 
 # # Instruction:
 # ########################################################
@@ -92,7 +92,7 @@ load_frame1()
 # root['bg'] = "mediumaquamarine"
 # # create_articleFile function no input perameters 
 # ####################################################################################################################
-# # This function will copy the URL of an  website were an article can be search to the clipborad. 
+# # This function will open a new tab the link the website search page 
 # # Then the funcation creates an input box. The input box will be use to to enter in the URL of the article location
 # # The function will createa button call WEB-Scrape and when click is will call the the function WebScraping()
 # ####################################################################################################################
@@ -187,11 +187,7 @@ def create_articleFile():
             file.write(url)
             input_linkButton.set("WEB-Scrap")
             
-# # Link Button Nature
-# wedsite_linkButton = WebScraper_articles.StringVar()
-# link_button = WebScraper_articles.Button(root, textvariable = wedsite_linkButton, command = lambda: create_articleFile() ,font = "Raleway" , bg = "mediumaquamarine", fg ="black", height = 2, width = 15)
-# wedsite_linkButton.set("Nature")  # create the Nature button
-# link_button.grid( column = 0, row =2) # positioning 
+
 def create_articleFile2 ():
     webbrowser.open('https://pubmed.ncbi.nlm.nih.gov/advanced/')
     Input_box2= WebScraper_articles.Entry(Frame3, width = 40, font = ("TkHeadingFont", 12))
@@ -236,12 +232,6 @@ def create_articleFile2 ():
                     publication_text = publication.get_text()
                     file.write(" ")
                     file.write(publication_text)
-#  # Link button for PubMed            
-# wedsite_linkButton2 = WebScraper_articles.StringVar()
-# link_button2 = WebScraper_articles.Button(root, textvariable = wedsite_linkButton2, font = "Raleway",command = lambda: create_articleFile2(), bg = "mediumaquamarine", fg ="black", height = 2, width = 15   )
-# wedsite_linkButton2.set("PubMed ") #creation of the PubMed button 
-# link_button2.grid( column = 1 , row = 2)
-
 root.mainloop()
 
 
