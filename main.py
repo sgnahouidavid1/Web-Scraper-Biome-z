@@ -2,47 +2,108 @@ import requests  # pip install requests in terminal
 from bs4 import BeautifulSoup  # pip install BeautifulSoup in terminal
 import tkinter as WebScraper_articles # adding the tkinter libary
 import random # use to generate random numbers random.randint() 
-import pyperclip # allow to copy text to the computer cilp borad 
-
-
+import webbrowser
+from tkinter import *
 from PIL import Image, ImageTk # allow the import of images in to the Gui progarm
-
 import pandas as pd  # pip install pandas in terminal
+bg_color = "#3A9AF9"
+def clear_data (frame):
+    for widght in frame.winfo_children():
+        widght.destroy()
+def load_frame3():
+    clear_data (Frame2)
+    clear_data (Frame1)
+    Frame3.tkraise()
+     #Inputing an image into the progarm and setting it as the backgrond of the program.
+    logo = Image.open('WebScraper_Images.png') # grabbing the image that will be use for thr progarm 
+    logo = ImageTk.PhotoImage(logo) # give the image a assign variable 
+    logo_label = WebScraper_articles.Label(Frame3,image = logo , bg = "#3A9AF9") # assigning logal_label tp the the image
+    logo_label.image = logo
+    logo_label.grid(columnspan= 8, rowspan= 6)
+    WebScraper_articles.Button(Frame3, text = "See the Instructions" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame2()).grid(column = 0, row = 6)
+    WebScraper_articles.Button(Frame3, text = "BACK 'to main page'" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame1()).grid(column = 7, row =6)
+    # Link Button Nature
+    wedsite_linkButton = WebScraper_articles.StringVar()
+    link_button = WebScraper_articles.Button(Frame3, textvariable = wedsite_linkButton, command = lambda: [create_articleFile()] ,font = ("TkHeadingFont", 12) , bg = "springgreen", fg ="snow", height = 1, width = 12)
+    wedsite_linkButton.set("Nature")  # create the Nature button
+    link_button.grid(column = 0, row = 0)# positioning
+    #Link button for PubMed            
+    wedsite_linkButton2 = WebScraper_articles.StringVar()
+    link_button2 = WebScraper_articles.Button(Frame3, textvariable = wedsite_linkButton2, font = ("TkHeadingFont", 12) ,command = lambda: create_articleFile2(),bg = "springgreen", fg ="snow", height = 1, width = 12   )
+    wedsite_linkButton2.set("PubMed ") #creation of the PubMed button 
+    link_button2.grid(column = 0, row = 1)
+def load_frame1():
+    clear_data (Frame2)
+    clear_data (Frame3)
+    Frame1.tkraise()
+    Frame1.pack_propagate(False)
+    #Inputing an image into the progarm and setting it as the backgrond of the program.
+    logo = Image.open('WebScraper.png') # grabbing the image that will be use for thr progarm 
+    logo = ImageTk.PhotoImage(logo) # give the image a assign variable 
+    logo_label = WebScraper_articles.Label(Frame1,image = logo , bg = "#3A9AF9") # assigning logal_label tp the the image
+    logo_label.image = logo
+    logo_label.grid(columnspan= 5, rowspan= 5) # positioning the image 
+    WebScraper_articles.Label(Frame1, text = "Lets start scraping some articles!", fg = "snow", bg = bg_color, font = ("TKMenuFont",14)).grid(column=2, row=4)
+    WebScraper_articles.Button(Frame1, text = "See Instructions" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame2()).grid(column=0, row=5)
+    WebScraper_articles.Button(Frame1, text = "Lets start scraping" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame3()).grid(column=4, row=5)
+    
+def load_frame2():
+    clear_data (Frame1)
+    clear_data (Frame3)
+    Frame2.tkraise()
+    logo = Image.open('preview.png') # grabbing the image that will be use for thr progarm 
+    logo = ImageTk.PhotoImage(logo) # give the image a assign variable 
+    logo_label = WebScraper_articles.Label(Frame2,image = logo , bg = "#3A9AF9") # assigning logal_label tp the the image
+    logo_label.image = logo
+    logo_label.pack( side = BOTTOM) # positioning the image
+    WebScraper_articles.Label(Frame2, text = "Perview:", fg = "snow", bg = bg_color, font = ("TKMenuFont",14)).pack(side = BOTTOM)
+    WebScraper_articles.Label(Frame2, text = "Instructions:", fg = "snow", bg = bg_color, font = ("TKMenuFont",14)).pack()
+    WebScraper_articles.Button(Frame2, text = "BACK to main page",font = ("TkHeadingFont", 10) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame1()).pack( side = BOTTOM ,anchor = 'w')
+    WebScraper_articles.Button(Frame2, text = "Lets start scraping  " ,font = ("TkHeadingFont", 10)  ,bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame3()).pack( side = BOTTOM ,anchor = 'w')
+    WebScraper_articles.Label(Frame2, text = "Click on the Website you would like to use to search for articles. Once you find\n the article your looking for copy the URL and place in the input box. \n Press the button WEB-Scrape to have the chosen article information scrape.\n   you'll now have an text file of the article scrape infromation", fg = "snow", bg = bg_color, font = ("TKMenuFont",12)).pack(anchor = "center")
 # Creating the Gui 
-root = WebScraper_articles.Tk(className= "webscraper_articles") # WebScraper_articles.Tk creating the gui and (className= "webscraper_articles") is change the name of the Gui to webscraper_articles. seting it equal to root, set root to hold the gui canvas before any chances are made 
-canvas = WebScraper_articles.Canvas(root, width = 400, height = 300) # WebScraper_articles.Canvas change the size of the gui program
-canvas.grid(columnspan =3, rowspan = 3) # positioning 
-# Inputing an image into the progarm and setting it as the backgrond of the program.
-logo = Image.open('WebScraper_Images.jpg') # grabbing the image that will be use for thr progarm 
-logo = ImageTk.PhotoImage(logo) # give the image a assign variable 
-logo_label = WebScraper_articles.Label(image = logo) # assigning logal_label tp the the image
-logo_label.image = logo
-logo_label.grid( columnspan = 3 ,rowspan = 3 ,column = 1, row = 0) # positioning the image 
+root = WebScraper_articles.Tk() # WebScraper_articles.Tk creating the gui and (className= "webscraper_articles") is change the name of the Gui to webscraper_articles. seting it equal to root, set root to hold the gui canvas before any chances are made 
+root.title("WEB-Scraper")
+root.eval("tk::PlaceWindow . center")
 
-# Instruction:
-########################################################
-# Instruction = WebScraper_articles.Label: The instruction of the app
-# Instruction['bg'] = "mediumaquamarine": setting the backgrond  color of the the labal
-# root['bg'] = "mediumaquamarine": setting the background color of the application 
-########################################################
-Instruction = WebScraper_articles.Label(root, text = "Click on the Website you would like to use to search for articles. Next paste in copied URL on your clipboard to a new tab on your web browser. \n Now search for the article and paste the article URL in the Input box. \n Lastly click  the button called WEB-Scrape to have you article scrape of its infromation and have the infromation stored in a file called Article(some number).txt  ", font = "Raleway")
-Instruction.grid(columnspan = 3, column = 0, row = 3)
-Instruction['bg'] = "mediumaquamarine"
-root['bg'] = "mediumaquamarine"
-# create_articleFile function no input perameters 
-####################################################################################################################
-# This function will copy the URL of an  website were an article can be search to the clipborad. 
-# Then the funcation creates an input box. The input box will be use to to enter in the URL of the article location
-# The function will createa button call WEB-Scrape and when click is will call the the function WebScraping()
-####################################################################################################################
+
+Frame1 = WebScraper_articles.Frame(root, width = 644, height = 445, bg = bg_color) # WebScraper_articles.Canvas change the size of the gui program
+Frame2 = WebScraper_articles.Frame(root, width = 644, height = 445,bg = bg_color) # WebScraper_articles.Canvas change the size of the gui program
+Frame3 = WebScraper_articles.Frame(root, width = 644, height = 445,bg = bg_color) # WebScraper_articles.Canvas change the size of the gui program
+
+for frame in (Frame1, Frame2, Frame3):
+    frame.grid(row = 0, column = 0, sticky = "nesw" )
+    
+load_frame1()
+
+
+
+# link_button.grid( column = 0, row =2) # positioning 
+
+# # Instruction:
+# ########################################################
+# # Instruction = WebScraper_articles.Label: The instruction of the app
+# # Instruction['bg'] = "mediumaquamarine": setting the backgrond  color of the the labal
+# # root['bg'] = "mediumaquamarine": setting the background color of the application 
+# ########################################################
+# Instruction = WebScraper_articles.Label(root, text = "Click on the Website you would like to use to search for articles. Next paste in copied URL on your clipboard to a new tab on your web browser. \n Now search for the article and paste the article URL in the Input box. \n Lastly click  the button called WEB-Scrape to have you article scrape of its infromation and have the infromation stored in a file called Article(some number).txt  ", font = "Raleway" )
+# Instruction.grid(columnspan = 2, column = 0, row = 5)
+# Instruction['bg'] = "mediumaquamarine"
+# root['bg'] = "mediumaquamarine"
+# # create_articleFile function no input perameters 
+# ####################################################################################################################
+# # This function will copy the URL of an  website were an article can be search to the clipborad. 
+# # Then the funcation creates an input box. The input box will be use to to enter in the URL of the article location
+# # The function will createa button call WEB-Scrape and when click is will call the the function WebScraping()
+# ####################################################################################################################
 def create_articleFile():
-    pyperclip.copy('https://www.nature.com/')
-    Input_box = WebScraper_articles.Entry(root, width = 40, font = ('Arial', 12))
-    Input_box.grid(columnspan = 3, column = 0, row = 1) # positioning of the input box
+    webbrowser.open('https://www.nature.com/search?order=relevance')
+    Input_box = WebScraper_articles.Entry(Frame3, width = 40, font = ("TkHeadingFont", 12))
+    Input_box.grid(column=6, row=4) # positioning of the input box
     input_linkButton = WebScraper_articles.StringVar()
-    input_button = WebScraper_articles.Button(root, textvariable = input_linkButton,command = lambda: WebScraping(),font = "Raleway" , bg = "mediumaquamarine", fg ="black", height = 2, width = 15)
+    input_button = WebScraper_articles.Button(Frame3, textvariable = input_linkButton,command = lambda: WebScraping(),font = ("TkHeadingFont", 12) , bg = "mediumaquamarine", fg ="snow", height = 1, width = 12)
     input_linkButton.set("WEB-Scrap") # setting the name of the button 
-    input_button.grid(columnspan = 3, column = 0, row = 2)  # positioning of the WEB-Scrape button 
+    input_button.grid(column=6, row=5)  # positioning of the WEB-Scrape button 
     # WebScraping function on input perameters
     #############################################################################################################
     # the function gets the information that is enter in the input box 
@@ -124,22 +185,23 @@ def create_articleFile():
 
             file.write("\n URL \n")
             file.write(url)
+            input_linkButton.set("WEB-Scrap")
             
-# Link Button Nature
-wedsite_linkButton = WebScraper_articles.StringVar()
-link_button = WebScraper_articles.Button(root, textvariable = wedsite_linkButton, command = lambda: create_articleFile() ,font = "Raleway" , bg = "mediumaquamarine", fg ="black", height = 2, width = 15)
-wedsite_linkButton.set("www.nature.com")  # create the Nature button
-link_button.grid(columnspan = 3 , column = 2, row = 1) # positioning 
+# # Link Button Nature
+# wedsite_linkButton = WebScraper_articles.StringVar()
+# link_button = WebScraper_articles.Button(root, textvariable = wedsite_linkButton, command = lambda: create_articleFile() ,font = "Raleway" , bg = "mediumaquamarine", fg ="black", height = 2, width = 15)
+# wedsite_linkButton.set("Nature")  # create the Nature button
+# link_button.grid( column = 0, row =2) # positioning 
 def create_articleFile2 ():
-    pyperclip.copy('https://pubmed.ncbi.nlm.nih.gov/')
-    Input_box = WebScraper_articles.Entry(root, width = 40, font = ('Arial', 12))
-    Input_box.grid(columnspan = 3, column = 0, row = 1)
+    webbrowser.open('https://pubmed.ncbi.nlm.nih.gov/advanced/')
+    Input_box2= WebScraper_articles.Entry(Frame3, width = 40, font = ("TkHeadingFont", 12))
+    Input_box2.grid(column=6, row=4)
     input_linkButton = WebScraper_articles.StringVar()
-    input_button = WebScraper_articles.Button(root, textvariable = input_linkButton,command = lambda: WebScraping2(),font = "Raleway" , bg = "mediumaquamarine", fg ="black", height = 2, width = 15)
+    input_button = WebScraper_articles.Button(Frame3, textvariable = input_linkButton,command = lambda: WebScraping2(),font = ("TkHeadingFont", 12), bg = "mediumaquamarine", fg ="snow", height = 1, width = 12)
     input_linkButton.set("WEB-Scrap")
-    input_button.grid(columnspan = 3, column = 0, row = 2)    
+    input_button.grid(column=6, row=5)   
     def WebScraping2():
-        Link = Input_box.get()
+        Link = Input_box2.get()
         url = Link
         index = random.randint(1,100)
         file = open("Article{0}.txt".format(index), "x")
@@ -174,10 +236,12 @@ def create_articleFile2 ():
                     publication_text = publication.get_text()
                     file.write(" ")
                     file.write(publication_text)
- # Link button for PubMed            
-wedsite_linkButton2 = WebScraper_articles.StringVar()
-link_button2 = WebScraper_articles.Button(root, textvariable = wedsite_linkButton2, font = "Raleway",command = lambda: create_articleFile2(), bg = "mediumaquamarine", fg ="black", height = 2, width = 15   )
-wedsite_linkButton2.set("PubMed ") #creation of the PubMed button 
-link_button2.grid(columnspan = 3 , column = 2 , row = 2)
+#  # Link button for PubMed            
+# wedsite_linkButton2 = WebScraper_articles.StringVar()
+# link_button2 = WebScraper_articles.Button(root, textvariable = wedsite_linkButton2, font = "Raleway",command = lambda: create_articleFile2(), bg = "mediumaquamarine", fg ="black", height = 2, width = 15   )
+# wedsite_linkButton2.set("PubMed ") #creation of the PubMed button 
+# link_button2.grid( column = 1 , row = 2)
 
 root.mainloop()
+
+
