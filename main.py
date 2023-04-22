@@ -1,11 +1,13 @@
 import requests  # pip install requests in terminal
 from bs4 import BeautifulSoup  # pip install BeautifulSoup in terminal
-import tkinter as WebScraper_articles # adding the tkinter libary
-import random # use to generate random numbers random.randint() 
+import tkinter as WebScraper_articles # adding the tkinter libary 
 import webbrowser # allow to open a website
 from tkinter import *
+from tkinter import filedialog # allows to browse the computer to find files 
+import re # allow the program to use findall word in a string ignoring spaces and puting it in a list.
+import os # help the program find the path if a file 
+import json # Json libary allow the text file to covert to a joson file
 from PIL import Image, ImageTk # allow the import of images in to the Gui progarm
-import pandas as pd  # pip install pandas in terminal
 bg_color = "#3A9AF9" # background color 
 def clear_data (frame):
     for widght in frame.winfo_children():
@@ -21,6 +23,7 @@ def load_frame3():
     logo_label.image = logo
     logo_label.grid(columnspan= 8, rowspan= 6)
     WebScraper_articles.Button(Frame3, text = "See the Instructions" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame2()).grid(column = 0, row = 6)
+    WebScraper_articles.Button(Frame3, text = "Convert to JSON" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: convert_json()).grid(column = 0, row = 5)
     WebScraper_articles.Button(Frame3, text = "BACK 'to main page'" ,font = ("TkHeadingFont", 15) , bg = "springgreen", fg ="snow", activebackground = "#badee2", activeforeground = "black", command = lambda: load_frame1()).grid(column = 7, row =6)
     # Link Button Nature
     wedsite_linkButton = WebScraper_articles.StringVar()
@@ -98,12 +101,12 @@ load_frame1()
 # ####################################################################################################################
 def create_articleFile():
     webbrowser.open('https://www.nature.com/search?order=relevance')
-    Input_box = WebScraper_articles.Entry(Frame3, width = 40, font = ("TkHeadingFont", 12))
-    Input_box.grid(column=6, row=4) # positioning of the input box
+    Input_box = WebScraper_articles.Entry(Frame3, width = 30, font = ("TkHeadingFont", 12))
+    Input_box.grid(column=4, row=4) # positioning of the input box
     input_linkButton = WebScraper_articles.StringVar()
     input_button = WebScraper_articles.Button(Frame3, textvariable = input_linkButton,command = lambda: WebScraping(),font = ("TkHeadingFont", 12) , bg = "mediumaquamarine", fg ="snow", height = 1, width = 12)
     input_linkButton.set("WEB-Scrap") # setting the name of the button 
-    input_button.grid(column=6, row=5)  # positioning of the WEB-Scrape button 
+    input_button.grid(column=4, row=5)  # positioning of the WEB-Scrape button 
     # WebScraping function on input perameters
     #############################################################################################################
     # the function gets the information that is enter in the input box 
@@ -114,13 +117,18 @@ def create_articleFile():
     def WebScraping():
         Link = Input_box.get() # getting the infomation fron the input bot and assiging it to the variable called Link
         url = Link
-        index = random.randint(1,100)
-        file = open("Article{0}.txt".format(index), "x")
-        response = requests.get(url) # requesting the html infomation for the website
-        if response.status_code == 200: # check if the request response ( if response.status_code equal  200 then he website allow permission to scrape the website)
+        response = requests.get(url) # requesting the html infomation for the website # check if the request response ( if response.status_code equal  200 then he website allow permission to scrape the website)
+        if response.status_code == 200:
             print("Successfully opened the web page \n")
             soup = BeautifulSoup(response.text, 'html.parser') # accessing the hmtl of the the website 
-            file.write("Title: \n")
+            texts = soup.find_all('h1', class_="c-article-title") # getting the article title infomation
+            for title in texts: 
+                title_text = title.get_text()
+            json_file_name = title_text.replace(' ','_')
+            json_file_name = json_file_name.replace('/', '_')
+            file = open("{0}.txt".format(json_file_name), "x")
+            
+            file.write("Title: ")
             texts = soup.find_all('h1', class_="c-article-title") # getting the article title infomation
             if texts == None: # if:  there no title for the article print nothing
                 file.write(" ")
@@ -129,7 +137,7 @@ def create_articleFile():
                     title_text = title.get_text()
                     file.write(title_text)
 
-            file.write("\n Publication: \n")
+            file.write("\n Publication: ")
             texts = soup.find('span', class_="c-meta__item") # getting the article publication info
             if texts == None: # if:  there no publication for the article print nothing
                 file.write(" ")
@@ -137,7 +145,7 @@ def create_articleFile():
                 for public in texts.find("i"):
                     publications = public.get_text()
                     file.write(publications)
-            file.write("\n Publication Year: \n")
+            file.write("\n Publication Year: ")
             texts = soup.find('a', href="#article-info") # getting the Publication Year 
             if texts == None:  # if:  there no publication year for the article, print nothing
                 file.write(" ")
@@ -145,7 +153,7 @@ def create_articleFile():
                 for publication in texts.find('time'):
                     publication_year = publication.get_text()
                     file.write(publication_year)
-            file.write("\n Authors: \n")
+            file.write("\n Authors: ")
             texts = soup.find_all('a', attrs = {'data-test': 'author-name'}) # getting all the author for the article 
             if texts == None:  # if:  there no author for the article, print nothing
                 file.write(" ")
@@ -155,7 +163,7 @@ def create_articleFile():
                     file.write(author_text)
                     file.write(' ')
 
-            file.write("\n Abstract \n")
+            file.write("\n Abstract: ")
             texts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content') # getting the abtract infomatiom
             if texts == None: # if:  there no abstract for the article, print nothing
                 file.write(" ")
@@ -164,7 +172,7 @@ def create_articleFile():
                     abstract_text = abstract.get_text()
                     file.write(abstract_text)
 
-            file.write("\n DOI \n") 
+            file.write("\n DOI: ") 
             # gettig the DOI information from the article
             texts = soup.find('li', class_='c-bibliographic-information__list-item c-bibliographic-information__list-item--doi')
             if texts == None: # if:  there no DOI for the article, print nothing
@@ -174,7 +182,7 @@ def create_articleFile():
                     DOI_text = DOI.get_text()
                     file.write(DOI_text)
 
-            file.write("\n ISSN \n")
+            file.write("\n ISSN: ")
             texts = soup.find('span', itemprop='onlineIssn') # getting the ISSN for the article 
             if texts == None: # if:  there no ISSN for the article, print nothing
                 file.write(" ")
@@ -183,38 +191,53 @@ def create_articleFile():
                     ISSN_num = ISSN.get_text()
                     file.write(ISSN_num)
 
-            file.write("\n URL \n")
+            file.write("\n URL: ")
             file.write(url)
             input_linkButton.set("WEB-Scrap")
             
 
 def create_articleFile2 ():
     webbrowser.open('https://pubmed.ncbi.nlm.nih.gov/advanced/')
-    Input_box2= WebScraper_articles.Entry(Frame3, width = 40, font = ("TkHeadingFont", 12))
-    Input_box2.grid(column=6, row=4)
+    Input_box2= WebScraper_articles.Entry(Frame3, width = 30, font = ("TkHeadingFont", 12))
+    Input_box2.grid(column=4, row=4)
     input_linkButton = WebScraper_articles.StringVar()
     input_button = WebScraper_articles.Button(Frame3, textvariable = input_linkButton,command = lambda: WebScraping2(),font = ("TkHeadingFont", 12), bg = "mediumaquamarine", fg ="snow", height = 1, width = 12)
     input_linkButton.set("WEB-Scrap")
-    input_button.grid(column=6, row=5)   
+    input_button.grid(column=4, row=5)   
     def WebScraping2():
         Link = Input_box2.get()
         url = Link
-        index = random.randint(1,100)
-        file = open("Article{0}.txt".format(index), "x")
         response = requests.get(url)
         if response.status_code == 200:
             print("Successfully opened the web page \n")
             soup = BeautifulSoup(response.text, 'html.parser')
-            file.write("Title: ")
-            texts = soup.find('div', class_="full-view" , id = "full-view-heading")
+            texts = soup.find("h1" , class_ = "heading-title")
             if texts == None:
                 file.write(" ")
             else:
-                for title in texts.find("h1" , class_ = "heading-title"):
+                for title in texts:
                     title_text = title.get_text()
-                    file.write(title_text)
-                    
-            file.write("\n Author: \n ")
+            json_file_name = ""
+            word = title_text.replace('\n','')
+            word = re.findall(r'\w+' , word)
+            for list in word:
+                json_file_name = json_file_name + " " + list
+            json_file_name = json_file_name.replace(" ","_")
+            file = open("{0}.txt".format(json_file_name), "x")
+            file.write("Title: ")
+            texts = soup.find("h1" , class_ = "heading-title")
+            if texts == None:
+                file.write(" ")
+            else:
+                for title in texts:
+                    title_text = title.get_text()
+                    json_file_name = " "
+                    word = title_text.replace('\n','')
+                    word = re.findall(r'\w+' , word)
+                    for list in word:
+                        json_file_name = json_file_name + " " + list 
+                    file.write(json_file_name)
+            file.write("\n Author:  ")
             texts = soup.find_all('a', class_="full-name")
             if texts == None:
                 file.write(" ")
@@ -223,7 +246,7 @@ def create_articleFile2 ():
                     Author_name = Author.get_text()
                     file.write(Author_name)
                     file.write(",  ")
-            file.write("\n Publication \n")
+            file.write("\n Publication: ")
             texts = soup.find('p', class_ = 'literature-footer-text')  
             if texts == None:
                 file.write(" ")
@@ -232,6 +255,21 @@ def create_articleFile2 ():
                     publication_text = publication.get_text()
                     file.write(" ")
                     file.write(publication_text)
+def convert_json():                 
+    json_file = filedialog.askopenfilename(parent=root ,filetypes = [("Text file", "*.txt")])
+    name = os.path.abspath(json_file)
+    file_name =  os.path.splitext(name)
+    if json_file:
+        print("file was sucessfuly loaded")
+    dict = {}
+    with open(json_file) as fn:
+        for dictionary in fn:
+            key, desc = dictionary.strip().split(None, 1)
+            dict[key] = desc.strip()
+                    
+    outfile = open("{0}.json".format(file_name[0]), "w")
+    json.dump(dict,outfile )
+    outfile.close()
 root.mainloop()
 
 
