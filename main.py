@@ -1,21 +1,28 @@
 from tkinter import ttk
 from tkinter import *
 from tkinter import messagebox
+from pymongo import MongoClient
+import yaml
+import certifi
 import math
-import time
-import os.path
+
 from os import path
 from bs4 import BeautifulSoup  # pip install BeautifulSoup in terminal
 import requests  # pip install requests in terminal
 import webbrowser  # allow to open a website
 # allow the program to use findall word in a string ignoring spaces and puting it in a list.
-import re
 import json  # Json libary allow the text file to covert to a joson file
 from tkinter import filedialog  # allows to browse the computer to find files
-import os
-import glob  # help the program find the path if a file
 from tkinter.filedialog import askdirectory
 running = True  # Global flag
+# Mongo DB connection
+
+config = yaml.safe_load(open('db.yaml'))
+client = MongoClient(config['uri'], tlsCAFile = certifi.where())
+db = client['biomez']
+collection = db.raw_records
+
+
 
 class Root(Tk):
     def __init__(self):
@@ -44,7 +51,6 @@ class Root(Tk):
             Article_input.delete(0, END)
             # add clicked list item to entry box
             Article_input.insert(0, List_box.get(ANCHOR))
-
         message = '''
 Dear Reader,
 
@@ -56,8 +62,8 @@ Dear Reader,
     in best possible way.
 
 Thanks & Regards,
-Team PythonGuides '''
-       
+Team PythonGuides  '''
+
         Mannual_box = Text(self.tab2, height=13, width=40, bg="lightgray")
         Mannual_box.insert('end', message)
         Mannual_box.pack(expand=True)
@@ -84,12 +90,6 @@ Team PythonGuides '''
         labelFrame5 = ttk.LabelFrame(
             self.tab3, text="Search Term:", width=300, height=140)
         labelFrame5.place(y=160)
-        ConvertJson = Button(self.tab3, text="Convert text File to Json",
-                             command=lambda: convert_json(), font=("TkHeadingFont", 12), width=23)
-        ConvertJson.place(y=410)
-        ConvertALLJson = Button(self.tab3, text="Convert all text File to Json",
-                                command=lambda: convertAll_json(), font=("TkHeadingFont", 12), width=23)
-        ConvertALLJson.place(y=445)
         labelFrame6 = ttk.LabelFrame(
             self.tab3, text="Article Search:", width=820, height=475)
         labelFrame6.place(x=325)
@@ -134,114 +134,17 @@ Team PythonGuides '''
                     update(Article_list)
                 View_Art = Button(labelFrame6, text="View Article", font=( "TkHeadingFont", 12), command=lambda: view_article(), width=13)
                 View_Art.place(y=80, x=15)
-                Web_scrape = Button(labelFrame6, text="WEB-Scrape", command=lambda: WebScraping_natural(), font=("TkHeadingFont", 12), width=13)
-                Web_scrape.place(y=120, x=15)
                 def view_article():
                     article = Article_input.get()
                     webbrowser.open("https://www.nature.com{0}".format(dicts[article]))
-                def WebScraping_natural():
-                    article_name = Article_input.get()
-                    url = "https://www.nature.com{0}".format(dicts[article_name])
-                    response = requests.get(url)
-                    if response.status_code == 200:
-                        print("Successfully opened the web page \n")
-                        # accessing the hmtl of the the website
-                        soup = BeautifulSoup(response.text, 'html.parser')
-                        # getting the article title infomation
-                        texts = soup.find_all('h1', class_="c-article-title")
-                        abstracts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content')
-                        if abstracts == []:  # if:  there no title for the article print nothing
-                            Cant_Scrape(article_name)
-                        else:
-                            for title in texts:
-                                title_text = title.get_text()
-                            json_file_name = title_text.replace(' ', '_')
-                            json_file_name = json_file_name.replace('/', '_')
-                            json_file_name = json_file_name.replace('-', '_')
-                            json_file_name = json_file_name.replace(':', '_')
-                            json_file_name = json_file_name.replace('?', '_')
-                            file = open("{0}.txt".format(json_file_name), "x", encoding="utf-8")
-                            file.write(" Title: ")
-                            # getting the article title infomation
-                            texts = soup.find_all('h1', class_="c-article-title")
-                            if texts == []:  # if:  there no title for the article print nothing
-                                file.write("Empty ")
-                            else:  # else: print the article's title
-                                for title in texts:
-                                    title_text = title.get_text()
-                                    file.write(title_text)
-
-                            file.write("\n Publication: ")
-                            # getting the article publication info
-                            texts = soup.find('i', attrs={'data-test': "journal-title"})
-                            if texts == []:  # if:  there no publication for the article print nothing
-                                file.write("Empty ")
-                            else:  # else: prints the article's Publication info
-                                for public in texts:
-                                    publications = public.get_text()
-                                    file.write(publications)
-                            file.write("\n Publication-Year: ")
-                            # getting the Publication Year
-                            texts = soup.find('a', href="#article-info")
-                            if texts == []:  # if:  there no publication year for the article, print nothing
-                                file.write("Empty ")
-                            else:  # else: prints the article's Publication year
-                                for publication in texts.find('time'):
-                                    publication_year = publication.get_text()
-                                    file.write(publication_year)
-
-                            file.write("\n Authors: ")
-                            # getting all the author for the article
-                            texts = soup.find_all('a', attrs={'data-test': 'author-name'})
-                            if texts == []:  # if:  there no author for the article, print nothing
-                                file.write("Empty ")
-                            else:  # else: prints the article's authors
-                                for names in texts:
-                                    author_text = names.get_text()
-                                    file.write(author_text)
-                                    file.write(',')
-
-                            file.write("\n Abstract: ")
-                            # getting the abtract infomatiom
-                            texts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content')
-                            if texts == []:  # if:  there no abstract for the article, print nothing
-                                file.write("Empty ")
-                            else:  # else:prints the article's abstract
-                                for abstract in texts:
-                                    abstract_text = abstract.get_text()
-                                    abstract_text = abstract_text.replace('\u2009', " ")
-                                    abstract_text = abstract_text.replace('\n', " ")
-                                    file.write(abstract_text)
-
-                            file.write("\n DOI: ")
-                            # gettig the DOI information from the article
-                            texts = soup.find('li', class_='c-bibliographic-information__list-item c-bibliographic-information__list-item--doi')
-                            if texts == []:  # if:  there no DOI for the article, print nothing
-                                file.write("Empty ")
-                            else:  # else: print the article's DOI
-                                for DOI in texts.find("span", class_='c-bibliographic-information__value'):
-                                    DOI_text = DOI.get_text()
-                                    file.write(DOI_text)
-
-                            file.write("\n URL: ")
-                            file.write(url)
-
-                            file.write("\n Keywords: ")
-                            texts = soup.find_all('li', class_="c-article-subject-list__subject")
-                            if texts == []:  # if:  there no DOI for the article, print nothing
-                                file.write("Empty ")
-
-                            else:
-                                for key in texts:
-                                    keywords = key.get_text()
-                                    file.write(keywords)
-                                    file.write(", ")
-
             def ScrapeArticle_byterm():
                 dicts = {}
                 Article_list = []
                 articlesNO_scrape = []
+                articles_dicts = {}
+                articles_list = []
                 term = Term_searchbox.get()
+                outfile = open("{}_articles.json".format(term), "w", encoding="utf-8")
                 url = "https://www.nature.com/search?q={}".format(term)
                 response = requests.get(url)
                 if response.status_code == 200:
@@ -265,141 +168,100 @@ Team PythonGuides '''
                     numOfarticle = len(Article_list)
                     progess = 100/numOfarticle
                     for articles in dicts.keys():
-                            url = "https://www.nature.com{0}".format(dicts[articles])
-                            response = requests.get(url)
-                            if response.status_code == 200:
-                                print("Successfully opened the web page \n")
-                                # accessing the hmtl of the the website
-                                soup = BeautifulSoup(response.text, 'html.parser')
+                        url = "https://www.nature.com{0}".format(dicts[articles])
+                        response = requests.get(url)
+                        if response.status_code == 200:
+                            print("Successfully opened the web page \n")
+                            # accessing the hmtl of the the website
+                            soup = BeautifulSoup(response.text, 'html.parser')
+                        abstracts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content')
+                        if abstracts == []:
+                            articlesNO_scrape.append(articles)
+                        else:
+                            articles_dicts["_id:"] = "None"
+                            articles_dicts["itemType:"] = "None"
+                            # getting the Publication Year
+                            texts = soup.find('a', href="#article-info")
+                            if texts == []:  # if:  there no publication year for the article, print nothing
+                                print("No Publication Year for: ", articles)
+                            else:  # else: prints the article's Publication year
+                                for publication in texts.find('time'):
+                                    publication_year = publication.get_text()
+                                articles_dicts["pubYear:"] = publication_year
+                                # getting all the author for the article
+                            texts = soup.find_all('a', attrs={'data-test': 'author-name'})
+                            if texts == []:  # if:  there no author for the article, print nothing
+                                print("No Authors names for: ", articles)
+                            else:  # else: prints the article's articles_texts
+                                articles_texts = ''
+                                for names in texts:
+                                    author_text = names.get_text()
+                                    articles_texts = articles_texts + author_text + " ,"
+                                    articles_texts = articles_texts.encode("ascii", 'ignore')
+                                    articles_texts = articles_texts.decode()
+                                articles_dicts["author:"] = articles_texts
                             # getting the article title infomation
                             texts = soup.find_all('h1', class_="c-article-title")
-                            abstracts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content')
-                            if abstracts == []:
-                                articlesNO_scrape.append(articles)
+                            for title in texts:
+                                title_text = title.get_text()
+                            articles_dicts["title:"] = title_text
+                        # getting the article publication info
+                            texts = soup.find('i', attrs={'data-test': "journal-title"})
+                            if texts == []:  # if:  there no publication for the article print nothing
+                                print("No Publication for: ", articles)
+                            else:  # else: prints the article's Publication info
+                                for public in texts:
+                                    publications = public.get_text()
+                                articles_dicts["pubTitle:"] = publications
+                            articles_dicts["issn:"] = "None"
+                            # gettig the DOI information from the article
+                            texts = soup.find('li', class_='c-bibliographic-information__list-item c-bibliographic-information__list-item--doi')
+                            if texts == []:  # if:  there no DOI for the article, print nothing
+                                print("No DOI for: ", articles)
+                            else:  # else: print the article's DOI
+                                for DOI in texts.find("span", class_='c-bibliographic-information__value'):
+                                    DOI_text = DOI.get_text()
+                                articles_dicts["doi:"] = DOI_text
+                            articles_dicts["url:"] = url
+                            # getting the abtract infomatiom
+                            texts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content')
+                                # else:prints the article's abstract
+                            articles_texts = ''
+                            for abstract in texts:
+                                abstract_text = abstract.get_text()
+                                abstract_text = abstract_text.replace('\u2009', " ")
+                                abstract_text = abstract_text.replace('\n', " ")
+                                articles_texts = articles_texts  + abstract_text + " "
+                                articles_texts = articles_texts.encode("ascii", 'ignore')
+                                articles_texts = articles_texts.decode()
+                            articles_dicts["abstract:"] = articles_texts
+                            articles_dicts["date:"] = "None"
+                            articles_dicts["issue:"] = "None"
+                            articles_dicts["volume:"] = "None"
+                            articles_dicts["libCatalog:"] = "None"
+                            articles_dicts["manualTags:"] = "None"
+                            articles_dicts["autoTags:"] = "None"
+                            texts = soup.find_all('li', class_="c-article-subject-list__subject")
+                            if texts == []:  # if:  there no DOI for the article, print nothing
+                                print("No Keywords for: ", articles)
+
                             else:
-                                for title in texts:
-                                    title_text = title.get_text()
-                                json_file_name = title_text.replace(' ', '_')
-                                json_file_name = json_file_name.replace('/', '_')
-                                json_file_name = json_file_name.replace('-', '_')
-                                json_file_name = json_file_name.replace(':', '_')
-                                json_file_name = json_file_name.replace('?', '_')
-                                if path.exists("{0}.txt".format(json_file_name)) == True:
-                                    fileExist("{0}.txt".format(json_file_name))
-                                else:
-                                    file = open("{0}.txt".format(json_file_name), "x", encoding="utf-8")
-                                    file.write(" Title: ")
-                                    # getting the article title infomation
-                                    texts = soup.find_all('h1', class_="c-article-title")
-                                    for title in texts:
-                                        title_text = title.get_text()
-                                        file.write(title_text)
-                                    file.write("\n Publication: ")
-                                # getting the article publication info
-                                    texts = soup.find('i', attrs={'data-test': "journal-title"})
-                                    if texts == []:  # if:  there no publication for the article print nothing
-                                        file.write("Empty ")
-                                    else:  # else: prints the article's Publication info
-                                        for public in texts:
-                                            publications = public.get_text()
-                                            file.write(publications)
-                                    file.write("\n Publication-Year: ")
-                                    # getting the Publication Year
-                                    texts = soup.find('a', href="#article-info")
-                                    if texts == []:  # if:  there no publication year for the article, print nothing
-                                        file.write("Empty ")
-                                    else:  # else: prints the article's Publication year
-                                        for publication in texts.find('time'):
-                                            publication_year = publication.get_text()
-                                            file.write(publication_year)
-
-                                    file.write("\n Authors: ")
-                                    # getting all the author for the article
-                                    texts = soup.find_all('a', attrs={'data-test': 'author-name'})
-                                    if texts == []:  # if:  there no author for the article, print nothing
-                                        file.write("Empty ")
-                                    else:  # else: prints the article's authors
-                                        for names in texts:
-                                            author_text = names.get_text()
-                                            file.write(author_text)
-                                            file.write(',')
-
-                                    file.write("\n Abstract: ")
-                                    # getting the abtract infomatiom
-                                    texts = soup.find_all('div', class_='c-article-section__content', id='Abs1-content')
-                                    if texts == []:  # if:  there no abstract for the article, print nothing
-                                        file.write("Empty ")
-                                    else:  # else:prints the article's abstract
-                                        for abstract in texts:
-                                            abstract_text = abstract.get_text()
-                                            abstract_text = abstract_text.replace('\u2009', " ")
-                                            abstract_text = abstract_text.replace('\n', " ")
-                                            file.write(abstract_text)
-
-                                    file.write("\n DOI: ")
-                                    # gettig the DOI information from the article
-                                    texts = soup.find('li', class_='c-bibliographic-information__list-item c-bibliographic-information__list-item--doi')
-                                    if texts == []:  # if:  there no DOI for the article, print nothing
-                                        file.write("Empty ")
-                                    else:  # else: print the article's DOI
-                                        for DOI in texts.find("span", class_='c-bibliographic-information__value'):
-                                            DOI_text = DOI.get_text()
-                                            file.write(DOI_text)
-
-                                    file.write("\n URL: ")
-                                    file.write(url)
-
-                                    file.write("\n Keywords: ")
-                                    texts = soup.find_all('li', class_="c-article-subject-list__subject")
-                                    if texts == []:  # if:  there no DOI for the article, print nothing
-                                        file.write("Empty ")
-
-                                    else:
-                                        for key in texts:
-                                            keywords = key.get_text()
-                                            file.write(keywords)
-                                            file.write(", ")
-                            articles_progress["value"] += progess
-                            self.update_idletasks()
-                            progress_label.config(text = math.trunc(articles_progress["value"]))
-                    NO_scrape = '\n'.join([str(elem) for elem in articlesNO_scrape])
-                    Cant_Scrape(NO_scrape)        
+                                articles_texts = ''
+                                for key in texts:
+                                    keywords = key.get_text()
+                                    articles_texts = articles_texts  + keywords + " ,"
+                                articles_dicts["keywords:"] = articles_texts
+                            articles_list.append(articles_dicts.copy())
+                        articles_progress["value"] += progess
+                        self.update_idletasks()
+                        progress_label.config(text = math.trunc(articles_progress["value"])) 
+                    outfile.write(json.dumps(articles_list, indent = 0))
+                    outfile.write("\n")
+                    NO_scrape = ' '.join([str(elem) for elem in articlesNO_scrape])
+                    Cant_Scrape(NO_scrape)
+                    
                             
                                 
-
-
-def convert_json():
-    json_file = filedialog.askopenfilename(
-        parent=root, filetypes=[("Text file", "*.txt")])
-    name = os.path.abspath(json_file)
-    file_name = os.path.splitext(name)
-    if json_file:
-        print("file was sucessfuly loaded")
-    dict = {}
-    with open(json_file, encoding="utf-8") as fn:
-        for dictionary in fn:
-            key, desc = dictionary.strip().split(None, 1)
-            dict[key] = desc.strip()
-
-    outfile = open("{0}.json".format(file_name[0]), "w", encoding="utf-8")
-    json.dump(dict, outfile)
-    outfile.close()
-
-
-def convertAll_json():
-    path = askdirectory()
-    os.chdir(path)
-    for file in glob.glob("*.txt"):
-        file_name = os.path.splitext(file)
-        dict = {}
-        with open(file, encoding="utf-8") as fn:
-            for dictionary in fn:
-                key, desc = dictionary.strip().split(None, 1)
-                dict[key] = desc.strip()
-
-        outfile = open("{0}.json".format(file_name[0]), "w", encoding="utf-8")
-        json.dump(dict, outfile)
-        outfile.close()
 
 
 def fileExist(file):
@@ -416,3 +278,4 @@ if __name__ == '__main__':
 
 
 root.mainloop()
+
