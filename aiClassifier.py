@@ -32,7 +32,6 @@ for record in allRecords:
     autoTags = { "autoTags": record['autoTags']}
 
     paragraph = title + ' ' + abstract
-    print(paragraph)
 
     # Run AI here. Output is Tags.
     tags = categorize_bps(paragraph)
