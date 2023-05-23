@@ -3,7 +3,7 @@ from pymongo import MongoClient
 # import certifi
 import json
 import yaml
-from aiBSP import * 
+from aiBSP import *
 
 # Pull URI string from yaml file.
 config = yaml.safe_load(open('db.yaml'))
@@ -21,15 +21,18 @@ except:
 # Access 'biomez' database and 'raw_records' collection that will store uncategorized, web-scraped articles.
 db = client['biomez']
 collection = db.raw_records
-collection2 = db.current_records
-# Output of the AI.
-# tags = "Bio, Distal"
 
 allRecords = collection.find()
 for record in allRecords:
     doi = record['doi']
     
+    title = record['title']
+    abstract = record['abstract']
+
     autoTags = { "autoTags": record['autoTags']}
+
+    paragraph = title + ' ' + abstract
+    print(paragraph)
 
     # Run AI here. Output is Tags.
     tags = categorize_bps(paragraph)
@@ -41,5 +44,4 @@ for record in allRecords:
     for doc in cursor:
         db["records"].insert_one(doc)
         collection.delete_one({"doi": doi})
-    
 
