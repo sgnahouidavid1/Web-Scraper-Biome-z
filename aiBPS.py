@@ -1,7 +1,16 @@
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.svm import SVC
+#https://stackoverflow.com/questions/24871047/importerror-no-module-named-sklearn-feature-extraction-text
+#Step 1: Make sure apt-get is updated
 
+#sudo apt-get update
+#Step 2: Install dependencies
+
+#sudo apt-get install build-essential python-dev python-setuptools python-numpy python-scipy libatlas-dev libatlas3gf-base
+#Step 3: pip install Scikit Learn
+
+#pip install --user --install-option="--prefix=" -U scikit-learn
 def preprocess(text):
     # Remove special characters and numbers
     text = re.sub('[^a-zA-Z]', ' ', text)

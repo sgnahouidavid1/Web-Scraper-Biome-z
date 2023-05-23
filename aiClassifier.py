@@ -32,6 +32,7 @@ for record in allRecords:
     autoTags = { "autoTags": record['autoTags']}
 
     # Run AI here. Output is Tags.
+    tags = categorize_bps(paragraph)
 
     newTags = { "$set": { "autoTags": tags} }
     collection.update_one(autoTags, newTags)
