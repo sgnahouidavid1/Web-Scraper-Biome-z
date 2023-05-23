@@ -51,19 +51,7 @@ class Root(Tk):
             Article_input.delete(0, END)
             # add clicked list item to entry box
             Article_input.insert(0, List_box.get(ANCHOR))
-        message = '''
-Dear Reader,
-
-    Don't let this situation
-    blind your future. We at
-    PythonGuides write tutorials
-    with real life examples to 
-    make you understand the concept
-    in best possible way.
-
-Thanks & Regards,
-Team PythonGuides  '''
-
+        message = ''' Luke I am your Father'''
         Mannual_box = Text(self.tab2, height=13, width=40, bg="lightgray")
         Mannual_box.insert('end', message)
         Mannual_box.pack(expand=True)

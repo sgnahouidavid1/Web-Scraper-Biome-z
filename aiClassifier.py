@@ -3,6 +3,7 @@ from pymongo import MongoClient
 # import certifi
 import json
 import yaml
+from aiBSP import * 
 
 # Pull URI string from yaml file.
 config = yaml.safe_load(open('db.yaml'))
@@ -20,9 +21,9 @@ except:
 # Access 'biomez' database and 'raw_records' collection that will store uncategorized, web-scraped articles.
 db = client['biomez']
 collection = db.raw_records
-
+collection2 = db.current_records
 # Output of the AI.
-tags = "Bio, Distal"
+# tags = "Bio, Distal"
 
 allRecords = collection.find()
 for record in allRecords:
